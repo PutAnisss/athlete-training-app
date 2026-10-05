@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EduTrain Athletic Conditioning Platform (FYP)</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Firebase SDKs (Compat Mode) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans pb-12">
+
+  <!-- TOP HEADER -->
+  <header class="bg-slate-800 border-b border-slate-700 sticky top-0 z-50 shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <div class="bg-indigo-600 p-2 rounded-lg text-white">
+          <i class="fa-solid fa-dumbbell text-xl"></i>
+        </div>
+        <div>
+          <h1 class="font-bold text-lg leading-tight text-white">EduTrain Athletics</h1>
+          <p class="text-xs text-indigo-400">Pedagogical Strength & Conditioning System</p>
+        </div>
+      </div>
+
+      <!-- VIEW SWITCHER (ATHLETE VS COACH) -->
+      <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-700 text-xs font-semibold">
+        <button id="btnAthleteMode" onclick="switchView('athlete')" class="px-4 py-1.5 rounded-lg bg-indigo-600 text-white transition">
+          <i class="fa-solid fa-user me-1"></i> Athlete View
+        </button>
+        <button id="btnCoachMode" onclick="switchView('coach')" class="px-4 py-1.5 rounded-lg text-slate-400 hover:text-white transition">
+          <i class="fa-solid fa-clipboard-user me-1"></i> Coach View
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-7xl mx-auto px-4 mt-6">
+
+    <!-- ============================================================ -->
+    <!-- ATHLETE VIEW SECTION -->
+    <!-- ============================================================ -->
+    <div id="athleteView" class="space-y-6">
+
+      <!-- ATHLETE SELECTION & PROFILE BAR -->
+      <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-sm">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
+          <div>
+            <label class="text-xs text-slate-400 block mb-1">Select Athlete ID / Profile:</label>
+            <select id="athleteIdInput" onchange="loadAthleteProfile()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-indigo-300 font-semibold focus:outline-none focus:border-indigo-500">
+              <option value="ATH-101">ATH-101: Puetri Anis (Silat Athlete)</option>
+              <option value="ATH-102">ATH-102: Ahmad Zaki (Sprinter)</option>
+              <option value="ATH-103">ATH-103: Sarah Lee (Badminton)</option>
+            </select>
+          </div>
+
+          <!-- BMI & WEIGHT DISPLAYS -->
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
+            <span class="text-xs text-slate-400 block">Current Weight & BMI</span>
+            <div class="flex items-baseline space-x-2 mt-1">
+              <span id="displayWeight" class="text-lg font-bold text-white">58 kg</span>
+              <span id="displayBMI" class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-semibold">BMI: 21.3 (Normal)</span>
+            </div>
+          </div>
+
+          <!-- 1RM MATRIX HIGHLIGHT -->
+          <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50 md:col-span-2">
+            <span class="text-xs text-slate-400 block">Estimated 1RM Strength Baselines</span>
+            <div class="grid grid-cols-3 gap-2 mt-1 text-center">
+              <div class="bg-slate-800 p-1.5 rounded border border-slate-700">
+                <p class="text-[10px] text-slate-400">Squat 1RM</p>
+                <p id="squat1RM" class="text-sm font-bold text-indigo-400">80 kg</p>
+              </div>
+              <div class="bg-slate-800 p-1.5 rounded border border-slate-700">
+                <p class="text-[10px] text-slate-400">Bench 1RM</p>
+                <p id="bench1RM" class="text-sm font-bold text-indigo-400">50 kg</p>
+              </div>
+              <div class="bg-slate-800 p-1.5 rounded border border-slate-700">
+                <p class="text-[10px] text-slate-400">Deadlift 1RM</p>
+                <p id="deadlift1RM" class="text-sm font-bold text-indigo-400">100 kg</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROGRAM SELECTOR & DAILY FOCUS BANNER -->
+      <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 relative overflow-hidden">
+        <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center">
+              <i class="fa-solid fa-calendar-days text-indigo-500 me-2"></i>
+              3-Day/Week Periodized Conditioning
+            </h2>
+            <p class="text-xs text-slate-400">Select week and training day to receive tailored educational guidance.</p>
+          </div>
+
+          <!-- WEEK & DAY PICKERS -->
+          <div class="flex items-center space-x-2">
+            <select id="weekSelect" onchange="renderWorkoutDay()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-slate-200">
+              <option value="1">Week 1: General Conditioning</option>
+              <option value="2">Week 2: Hypertrophy & Base</option>
+              <option value="3">Week 3: Max Power & Explosiveness</option>
+              <option value="4">Week 4: Deload & Agility Peak</option>
+            </select>
+            <select id="daySelect" onchange="renderWorkoutDay()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-indigo-400 font-bold">
+              <option value="1">Day 1: Strength & Power</option>
+              <option value="2">Day 2: Hypertrophy & Core</option>
+              <option value="3">Day 3: Agility & Plyometrics</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- EDUCATIONAL FOCUS BANNER -->
+        <div class="bg-indigo-950/60 border border-indigo-700/50 rounded-xl p-4 flex items-start space-x-3">
+          <i class="fa-solid fa-bullseye text-2xl text-indigo-400 mt-1"></i>
+          <div>
+            <h3 class="text-sm font-bold text-indigo-200 uppercase tracking-wider" id="focusTitle">Today's Focus: Explosive Lower Body Power</h3>
+            <p class="text-xs text-indigo-300/80 mt-1" id="focusPedagogy">
+              <strong>Educational Goal:</strong> Focus on rapid force production. Move the bar as fast as possible during the concentric phase to maximize rate of force development (RFD).
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- WORKOUT SESSION & TIMER WORKSPACE -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- EXERCISE LIST & VIDEO GUIDES (2 COLUMNS) -->
+        <div class="lg:col-span-2 space-y-4">
+          <div class="flex justify-between items-center">
+            <h3 class="font-bold text-slate-200 flex items-center">
+              <i class="fa-solid fa-list-check me-2 text-indigo-400"></i> Assigned Exercises
+            </h3>
+            <!-- LIVE SESSION TIMER -->
+            <div class="bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700 flex items-center space-x-2">
+              <i class="fa-solid fa-stopwatch text-emerald-400 animate-pulse"></i>
+              <span id="sessionTimer" class="text-sm font-mono text-emerald-400 font-bold">00:00</span>
+              <button onclick="toggleTimer()" id="timerToggleBtn" class="text-[10px] bg-slate-700 hover:bg-slate-600 text-slate-200 px-2 py-0.5 rounded">Start</button>
+            </div>
+          </div>
+
+          <!-- DYNAMIC EXERCISE CARDS CONTAINER -->
+          <div id="exerciseListContainer" class="space-y-4">
+            <!-- Dynamically populated via JavaScript -->
+          </div>
+        </div>
+
+        <!-- POST-WORKOUT LOG & REFLECTION PANEL (1 COLUMN) -->
+        <div class="space-y-4">
+          <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-sm sticky top-20">
+            <h3 class="font-bold text-slate-100 border-b border-slate-700 pb-3 mb-4 flex items-center">
+              <i class="fa-solid fa-pen-to-square me-2 text-indigo-400"></i> Athlete Post-Session Reflection
+            </h3>
+
+            <!-- DIFFICULTY RPE RATING -->
+            <div class="mb-4">
+              <label class="text-xs text-slate-400 block mb-2">How hard was today's training session?</label>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <button onclick="selectRPE(this, '😃 Easy (RPE 1-4)')" class="rpe-btn bg-slate-900 hover:bg-slate-700 p-2 rounded-lg border border-slate-700 text-left">😃 Easy (RPE 1-4)</button>
+                <button onclick="selectRPE(this, '⚡ Moderate (RPE 5-6)')" class="rpe-btn bg-slate-900 hover:bg-slate-700 p-2 rounded-lg border border-slate-700 text-left">⚡ Moderate (RPE 5-6)</button>
+                <button onclick="selectRPE(this, '🔥 Hard (RPE 7-8)')" class="rpe-btn bg-slate-900 hover:bg-slate-700 p-2 rounded-lg border border-slate-700 text-left">🔥 Hard (RPE 7-8)</button>
+                <button onclick="selectRPE(this, '☠️ Exhausting (RPE 9-10)')" class="rpe-btn bg-slate-900 hover:bg-slate-700 p-2 rounded-lg border border-slate-700 text-left">☠️ Exhausting (9-10)</button>
+              </div>
+            </div>
+
+            <!-- COMMENTS / NOTES -->
+            <div class="mb-4">
+              <label class="text-xs text-slate-400 block mb-1">Athlete Notes & Feedback for Coach:</label>
+              <textarea id="athleteFeedback" rows="3" placeholder="E.g., Left knee felt slight discomfort during squat sets; overall energy was good..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></textarea>
+            </div>
+
+            <!-- SUBMIT BUTTON -->
+            <button onclick="submitWorkoutSession()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl shadow-lg transition flex items-center justify-center space-x-2">
+              <i class="fa-solid fa-cloud-arrow-up"></i>
+              <span>Save & Send to Coach</span>
+            </button>
+            <p id="saveStatus" class="text-[11px] text-center mt-2 text-slate-400 hidden"></p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- COACH DASHBOARD VIEW SECTION -->
+    <!-- ============================================================ -->
+    <div id="coachView" class="hidden space-y-6">
+      
+      <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6">
+        <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center">
+              <i class="fa-solid fa-user-shield text-indigo-400 me-2"></i> Coach Assessment & Monitoring Portal
+            </h2>
+            <p class="text-xs text-slate-400">Review real-time athlete completion logs, RPE fatigue levels, and qualitative feedback.</p>
+          </div>
+
+          <button onclick="loadCoachData()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-2 rounded-lg text-slate-200">
+            <i class="fa-solid fa-rotate me-1"></i> Refresh Logs
+          </button>
+        </div>
+
+        <!-- SUMMARY METRICS CARDS -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+            <p class="text-xs text-slate-400">Total Submissions</p>
+            <p id="coachTotalLogs" class="text-2xl font-bold text-indigo-400 mt-1">0</p>
+          </div>
+          <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+            <p class="text-xs text-slate-400">Active Monitored Athletes</p>
+            <p class="text-2xl font-bold text-emerald-400 mt-1">3 Athletes</p>
+          </div>
+          <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+            <p class="text-xs text-slate-400">Fatigue Alerts (RPE 9-10)</p>
+            <p id="coachFatigueAlerts" class="text-2xl font-bold text-rose-400 mt-1">0</p>
+          </div>
+        </div>
+
+        <!-- SUBMITTED LOGS TABLE -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs text-slate-300">
+            <thead class="bg-slate-900 text-slate-400 border-b border-slate-700 uppercase font-semibold">
+              <tr>
+                <th class="p-3">Athlete</th>
+                <th class="p-3">Program Schedule</th>
+                <th class="p-3">Duration</th>
+                <th class="p-3">Difficulty / RPE</th>
+                <th class="p-3">Completed Exercises</th>
+                <th class="p-3">Athlete Notes</th>
+              </tr>
+            </thead>
+            <tbody id="coachLogsTableBody" class="divide-y divide-slate-700/50">
+              <tr>
+                <td colspan="6" class="p-4 text-center text-slate-500">No workout records retrieved yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- JAVASCRIPT APP LOGIC & FIREBASE INTEGRATION -->
+  <script>
+    // ============================================================
+    // 1. FIREBASE CONFIGURATION (YOUR PROJECT KEYS)
+    // ============================================================
+    const firebaseConfig = {
+      apiKey: "AIzaSyBoto8JKKT-8loiBSo2l45vBtu_jLn-Jtg",
+      authDomain: "athletetrainingapp.firebaseapp.com",
+      projectId: "athletetrainingapp",
+      storageBucket: "athletetrainingapp.firebasestorage.app",
+      messagingSenderId: "355115906481",
+      appId: "1:355115906481:web:20ca3d8d87d9671d52f990",
+      measurementId: "G-MCJ71PC979"
+    };
+
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+      firebase.initializeApp(firebaseConfig);
+    }
+    const db = firebase.firestore();
+
+    // ============================================================
+    // 2. CURRICULUM DATA STRUCTURE
+    // ============================================================
+    const workoutCurriculum = {
+      "1-1": {
+        focus: "Week 1 Day 1: Explosive Lower Body Power & Foundation",
+        pedagogy: "Educational Goal: Focus on rapid movement during the concentric phase. Maintain strict lumbar spine posture.",
+        exercises: [
+          { name: "Barbell Back Squat", sets: "4 Sets x 6 Reps", load: "75% 1RM", video: "https://www.youtube.com/embed/gsvT6OHbd_w", tips: "Keep chest lifted and drive through mid-foot." },
+          { name: "Plyometric Box Jumps", sets: "3 Sets x 5 Reps", load: "Bodyweight", video: "https://www.youtube.com/embed/52r_Ul5k03g", tips: "Focus on soft, quiet landings to absorb impact safely." }
+        ]
+      },
+      "1-2": {
+        focus: "Week 1 Day 2: Upper Body Hypertrophy & Core Stability",
+        pedagogy: "Educational Goal: Focus on controlled eccentric lowering tempo (2-3 seconds) to stimulate muscle hypertrophy.",
+        exercises: [
+          { name: "Barbell Bench Press", sets: "4 Sets x 8 Reps", load: "70% 1RM", video: "https://www.youtube.com/embed/rT7DgCr-3pg", tips: "Maintain 3 points of contact: head, shoulders, and hips on bench." },
+          { name: "Hanging Leg Raises", sets: "3 Sets x 12 Reps", load: "Bodyweight", video: "https://www.youtube.com/embed/hdng3Nm1x_E", tips: "Avoid swinging momentum; engage abdominal core tightly." }
+        ]
+      },
+      "1-3": {
+        focus: "Week 1 Day 3: Multidirectional Agility & Speed",
+        pedagogy: "Educational Goal: Master deceleration mechanics and low center-of-mass direction changes.",
+        exercises: [
+          { name: "Ladder Drills & Cone Shuttles", sets: "5 Sets x 15s Burst", load: "Speed Focus", video: "https://www.youtube.com/embed/74L19T8oJpE", tips: "Stay light on toe pads; avoid heel striking during quick cuts." }
+        ]
+      }
+    };
+
+    const defaultExercise = {
+      focus: "General Physical Preparedness & Conditioning",
+      pedagogy: "Educational Goal: Focus on form compliance and steady metabolic effort.",
+      exercises: [
+        { name: "Trap Bar Deadlift", sets: "3 Sets x 8 Reps", load: "70% 1RM", video: "https://www.youtube.com/embed/gsvT6OHbd_w", tips: "Hinge at hips, engage lats before lifting." }
+      ]
+    };
+
+    let timerInterval = null;
+    let sessionSeconds = 0;
+    let selectedRPEValue = "";
+
+    // ============================================================
+    // 3. UI INITIALIZATION & SWITCHERS
+    // ============================================================
+    window.onload = function() {
+      loadAthleteProfile();
+      renderWorkoutDay();
+      startTimer();
+    };
+
+    function switchView(view) {
+      if (view === 'athlete') {
+        document.getElementById('athleteView').classList.remove('hidden');
+        document.getElementById('coachView').classList.add('hidden');
+        document.getElementById('btnAthleteMode').className = "px-4 py-1.5 rounded-lg bg-indigo-600 text-white transition";
+        document.getElementById('btnCoachMode').className = "px-4 py-1.5 rounded-lg text-slate-400 hover:text-white transition";
+      } else {
+        document.getElementById('athleteView').classList.add('hidden');
+        document.getElementById('coachView').classList.remove('hidden');
+        document.getElementById('btnCoachMode').className = "px-4 py-1.5 rounded-lg bg-indigo-600 text-white transition";
+        document.getElementById('btnAthleteMode').className = "px-4 py-1.5 rounded-lg text-slate-400 hover:text-white transition";
+        loadCoachData();
+      }
+    }
+
+    function loadAthleteProfile() {
+      const athleteId = document.getElementById('athleteIdInput').value;
+      if (athleteId === "ATH-101") {
+        document.getElementById('displayWeight').innerText = "58 kg";
+        document.getElementById('displayBMI').innerText = "BMI: 21.3 (Normal)";
+        document.getElementById('squat1RM').innerText = "80 kg";
+        document.getElementById('bench1RM').innerText = "50 kg";
+        document.getElementById('deadlift1RM').innerText = "100 kg";
+      } else if (athleteId === "ATH-102") {
+        document.getElementById('displayWeight').innerText = "72 kg";
+        document.getElementById('displayBMI').innerText = "BMI: 23.1 (Normal)";
+        document.getElementById('squat1RM').innerText = "120 kg";
+        document.getElementById('bench1RM').innerText = "85 kg";
+        document.getElementById('deadlift1RM').innerText = "140 kg";
+      } else {
+        document.getElementById('displayWeight').innerText = "54 kg";
+        document.getElementById('displayBMI').innerText = "BMI: 19.8 (Optimal)";
+        document.getElementById('squat1RM').innerText = "65 kg";
+        document.getElementById('bench1RM').innerText = "40 kg";
+        document.getElementById('deadlift1RM').innerText = "85 kg";
+      }
+    }
+
+    function renderWorkoutDay() {
+      const week = document.getElementById('weekSelect').value;
+      const day = document.getElementById('daySelect').value;
+      const key = `${week}-${day}`;
+      const data = workoutCurriculum[key] || defaultExercise;
+
+      document.getElementById('focusTitle').innerText = data.focus;
+      document.getElementById('focusPedagogy').innerHTML = `<strong>Educational Goal:</strong> ${data.pedagogy}`;
+
+      const container = document.getElementById('exerciseListContainer');
+      container.innerHTML = "";
+
+      data.exercises.forEach((ex, idx) => {
+        container.innerHTML += `
+          <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-sm">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center space-x-3">
+                <input type="checkbox" id="exCheck_${idx}" value="${ex.name}" class="w-5 h-5 accent-indigo-600 rounded cursor-pointer">
+                <div>
+                  <h4 class="font-bold text-white text-sm">${ex.name}</h4>
+                  <p class="text-xs text-indigo-400 font-medium">${ex.sets} | Load Target: <span class="text-emerald-400">${ex.load}</span></p>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-3 bg-slate-900/80 p-2.5 rounded-lg border border-slate-700/60 text-xs text-slate-300">
+              <i class="fa-solid fa-lightbulb text-amber-400 me-1"></i> <strong>Form Tip:</strong> ${ex.tips}
+            </div>
+
+            <div class="mt-3 aspect-video rounded-lg overflow-hidden border border-slate-700">
+              <iframe class="w-full h-full" src="${ex.video}" title="Exercise Demo" frameborder="0" allowfullscreen></iframe>
+            </div>
+          </div>
+        `;
+      });
+    }
+
+    // ============================================================
+    // 4. TIMER & RPE RATING LOGIC
+    // ============================================================
+    function startTimer() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        sessionSeconds++;
+        const mins = String(Math.floor(sessionSeconds / 60)).padStart(2, '0');
+        const secs = String(sessionSeconds % 60).padStart(2, '0');
+        document.getElementById('sessionTimer').innerText = `${mins}:${secs}`;
+      }, 1000);
+    }
+
+    function toggleTimer() {
+      const btn = document.getElementById('timerToggleBtn');
+      if (btn.innerText === "Pause") {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        btn.innerText = "Resume";
+      } else {
+        startTimer();
+        btn.innerText = "Pause";
+      }
+    }
+
+    function selectRPE(btnElement, rpeText) {
+      selectedRPEValue = rpeText;
+      document.querySelectorAll('.rpe-btn').forEach(b => b.classList.remove('bg-indigo-600', 'text-white', 'border-indigo-400'));
+      btnElement.classList.add('bg-indigo-600', 'text-white', 'border-indigo-400');
+    }
+
+    // ============================================================
+    // 5. DATABASE SAVE FUNCTION (FIREBASE CLOUD)
+    // ============================================================
+    async function submitWorkoutSession() {
+      const statusEl = document.getElementById('saveStatus');
+      statusEl.classList.remove('hidden');
+      statusEl.innerText = "Saving to database...";
+
+      const athleteId = document.getElementById('athleteIdInput').value;
+      const week = document.getElementById('weekSelect').value;
+      const day = document.getElementById('daySelect').value;
+      const feedback = document.getElementById('athleteFeedback').value;
+
+      const completedList = [];
+      document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
+        completedList.push(cb.value);
+      });
+
+      const logData = {
+        athleteId: athleteId,
+        weekNumber: week,
+        dayNumber: day,
+        sessionTimeSeconds: sessionSeconds,
+        difficultyRating: selectedRPEValue || "⚡ Moderate (RPE 5-6)",
+        comments: feedback || "No comments written.",
+        completedExercises: completedList,
+        timestamp: new Date().toISOString()
+      };
+
+      try {
+        await db.collection("workout_logs").add(logData);
+        statusEl.innerText = "✅ Saved to Cloud Database for Coach!";
+        statusEl.className = "text-[11px] text-center mt-2 text-emerald-400";
+      } catch (err) {
+        console.warn("Saving to local fallback:", err);
+        let localLogs = JSON.parse(localStorage.getItem('fpy_workout_logs') || '[]');
+        localLogs.push(logData);
+        localStorage.setItem('fpy_workout_logs', JSON.stringify(localLogs));
+        
+        statusEl.innerText = "⚠ Saved locally (Check Firestore enable status).";
+        statusEl.className = "text-[11px] text-center mt-2 text-amber-400";
+      }
+    }
+
+    // ============================================================
+    // 6. COACH VIEW: FETCH FROM DATABASE
+    // ============================================================
+    async function loadCoachData() {
+      const tableBody = document.getElementById('coachLogsTableBody');
+      tableBody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">Loading athlete logs...</td></tr>';
+
+      let logs = [];
+
+      try {
+        const snapshot = await db.collection("workout_logs").get();
+        snapshot.forEach(doc => logs.push(doc.data()));
+        // Sort newest first
+        logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+      } catch (err) {
+        console.warn("Reading from local fallback:", err);
+        logs = JSON.parse(localStorage.getItem('fpy_workout_logs') || '[]').reverse();
+      }
+
+      document.getElementById('coachTotalLogs').innerText = logs.length;
+      let fatigueCount = 0;
+      tableBody.innerHTML = "";
+
+      if (logs.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-500">No workout records found.</td></tr>';
+        return;
+      }
+
+      logs.forEach(log => {
+        if (log.difficultyRating && log.difficultyRating.includes("Exhausting")) fatigueCount++;
+
+        const mins = Math.floor(log.sessionTimeSeconds / 60);
+        const secs = log.sessionTimeSeconds % 60;
+        const formattedTime = `${mins}m ${secs}s`;
+
+        tableBody.innerHTML += `
+          <tr class="hover:bg-slate-800/60">
+            <td class="p-3 font-bold text-indigo-400">${log.athleteId}</td>
+            <td class="p-3">Week ${log.weekNumber}, Day ${log.dayNumber}</td>
+            <td class="p-3 font-mono">${formattedTime}</td>
+            <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700">${log.difficultyRating}</span></td>
+            <td class="p-3 text-emerald-400 font-semibold">${log.completedExercises.length} Completed</td>
+            <td class="p-3 text-slate-300 italic">${log.comments}</td>
+          </tr>
+        `;
+      });
+
+      document.getElementById('coachFatigueAlerts').innerText = fatigueCount;
+    }
+  </script>
+</body>
+</html>
