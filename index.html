@@ -48,13 +48,23 @@
     <!-- ============================================================ -->
     <div id="athleteView" class="space-y-6">
 
-      <!-- ATHLETE SELECTION & PROFILE BAR -->
+      <!-- ATHLETE SELECTION & PROFILE BAR WITH EDITING -->
       <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-sm">
+        <div class="flex justify-between items-center mb-3">
+          <h3 class="text-sm font-bold text-slate-200 flex items-center">
+            <i class="fa-solid fa-id-card text-indigo-400 me-2"></i> Athlete Profile & Metrics
+          </h3>
+          <button onclick="openProfileModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-1.5 rounded-lg transition flex items-center space-x-1 font-semibold">
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span>Edit My Profile & 1RM</span>
+          </button>
+        </div>
+
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-center">
           <div>
-            <label class="text-xs text-slate-400 block mb-1">Select Athlete ID / Profile:</label>
+            <label class="text-xs text-slate-400 block mb-1">Select Active Profile:</label>
             <select id="athleteIdInput" onchange="loadAthleteProfile()" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm text-indigo-300 font-semibold focus:outline-none focus:border-indigo-500">
-              <option value="ATH-101">ATH-101: Puetri Anis (Silat Athlete)</option>
+              <option value="ATH-101">ATH-101: Puetri Anis (Pencak Silat)</option>
               <option value="ATH-102">ATH-102: Ahmad Zaki (Sprinter)</option>
               <option value="ATH-103">ATH-103: Sarah Lee (Badminton)</option>
             </select>
@@ -62,28 +72,31 @@
 
           <!-- BMI & WEIGHT DISPLAYS -->
           <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50">
-            <span class="text-xs text-slate-400 block">Current Weight & BMI</span>
+            <span class="text-xs text-slate-400 block">Current Weight & Height</span>
             <div class="flex items-baseline space-x-2 mt-1">
               <span id="displayWeight" class="text-lg font-bold text-white">58 kg</span>
-              <span id="displayBMI" class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-semibold">BMI: 21.3 (Normal)</span>
+              <span id="displayBMI" class="text-xs px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 font-semibold">BMI: 21.3</span>
             </div>
           </div>
 
           <!-- 1RM MATRIX HIGHLIGHT -->
           <div class="bg-slate-900/60 p-3 rounded-xl border border-slate-700/50 md:col-span-2">
-            <span class="text-xs text-slate-400 block">Estimated 1RM Strength Baselines</span>
+            <span class="text-xs text-slate-400 block">Current 1RM Baselines & Target Loads</span>
             <div class="grid grid-cols-3 gap-2 mt-1 text-center">
               <div class="bg-slate-800 p-1.5 rounded border border-slate-700">
                 <p class="text-[10px] text-slate-400">Squat 1RM</p>
                 <p id="squat1RM" class="text-sm font-bold text-indigo-400">80 kg</p>
+                <p id="squat75" class="text-[10px] text-emerald-400">75%: 60 kg</p>
               </div>
               <div class="bg-slate-800 p-1.5 rounded border border-slate-700">
                 <p class="text-[10px] text-slate-400">Bench 1RM</p>
                 <p id="bench1RM" class="text-sm font-bold text-indigo-400">50 kg</p>
+                <p id="bench75" class="text-[10px] text-emerald-400">75%: 37.5 kg</p>
               </div>
               <div class="bg-slate-800 p-1.5 rounded border border-slate-700">
                 <p class="text-[10px] text-slate-400">Deadlift 1RM</p>
                 <p id="deadlift1RM" class="text-sm font-bold text-indigo-400">100 kg</p>
+                <p id="deadlift75" class="text-[10px] text-emerald-400">75%: 75 kg</p>
               </div>
             </div>
           </div>
@@ -123,7 +136,7 @@
           <div>
             <h3 class="text-sm font-bold text-indigo-200 uppercase tracking-wider" id="focusTitle">Today's Focus: Explosive Lower Body Power</h3>
             <p class="text-xs text-indigo-300/80 mt-1" id="focusPedagogy">
-              <strong>Educational Goal:</strong> Focus on rapid force production. Move the bar as fast as possible during the concentric phase to maximize rate of force development (RFD).
+              <strong>Educational Goal:</strong> Focus on rapid movement during the concentric phase.
             </p>
           </div>
         </div>
@@ -132,17 +145,21 @@
       <!-- WORKOUT SESSION & TIMER WORKSPACE -->
       <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        <!-- EXERCISE LIST & VIDEO GUIDES (2 COLUMNS) -->
+        <!-- EXERCISE LIST & CUSTOM EXERCISE CREATOR (2 COLUMNS) -->
         <div class="lg:col-span-2 space-y-4">
           <div class="flex justify-between items-center">
             <h3 class="font-bold text-slate-200 flex items-center">
               <i class="fa-solid fa-list-check me-2 text-indigo-400"></i> Assigned Exercises
             </h3>
-            <!-- LIVE SESSION TIMER -->
-            <div class="bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700 flex items-center space-x-2">
-              <i class="fa-solid fa-stopwatch text-emerald-400 animate-pulse"></i>
-              <span id="sessionTimer" class="text-sm font-mono text-emerald-400 font-bold">00:00</span>
-              <button onclick="toggleTimer()" id="timerToggleBtn" class="text-[10px] bg-slate-700 hover:bg-slate-600 text-slate-200 px-2 py-0.5 rounded">Start</button>
+            <div class="flex items-center space-x-2">
+              <button onclick="openCustomExerciseModal()" class="bg-slate-800 border border-slate-700 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-xl text-indigo-300 font-semibold transition">
+                <i class="fa-solid fa-plus me-1"></i> Add Custom Exercise
+              </button>
+              <div class="bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700 flex items-center space-x-2">
+                <i class="fa-solid fa-stopwatch text-emerald-400 animate-pulse"></i>
+                <span id="sessionTimer" class="text-sm font-mono text-emerald-400 font-bold">00:00</span>
+                <button onclick="toggleTimer()" id="timerToggleBtn" class="text-[10px] bg-slate-700 hover:bg-slate-600 text-slate-200 px-2 py-0.5 rounded">Start</button>
+              </div>
             </div>
           </div>
 
@@ -156,12 +173,12 @@
         <div class="space-y-4">
           <div class="bg-slate-800 border border-slate-700 rounded-2xl p-5 shadow-sm sticky top-20">
             <h3 class="font-bold text-slate-100 border-b border-slate-700 pb-3 mb-4 flex items-center">
-              <i class="fa-solid fa-pen-to-square me-2 text-indigo-400"></i> Athlete Post-Session Reflection
+              <i class="fa-solid fa-pen-to-square me-2 text-indigo-400"></i> Post-Session Reflection
             </h3>
 
             <!-- DIFFICULTY RPE RATING -->
             <div class="mb-4">
-              <label class="text-xs text-slate-400 block mb-2">How hard was today's training session?</label>
+              <label class="text-xs text-slate-400 block mb-2">How hard was today's session?</label>
               <div class="grid grid-cols-2 gap-2 text-xs">
                 <button onclick="selectRPE(this, '😃 Easy (RPE 1-4)')" class="rpe-btn bg-slate-900 hover:bg-slate-700 p-2 rounded-lg border border-slate-700 text-left">😃 Easy (RPE 1-4)</button>
                 <button onclick="selectRPE(this, '⚡ Moderate (RPE 5-6)')" class="rpe-btn bg-slate-900 hover:bg-slate-700 p-2 rounded-lg border border-slate-700 text-left">⚡ Moderate (RPE 5-6)</button>
@@ -173,7 +190,7 @@
             <!-- COMMENTS / NOTES -->
             <div class="mb-4">
               <label class="text-xs text-slate-400 block mb-1">Athlete Notes & Feedback for Coach:</label>
-              <textarea id="athleteFeedback" rows="3" placeholder="E.g., Left knee felt slight discomfort during squat sets; overall energy was good..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></textarea>
+              <textarea id="athleteFeedback" rows="3" placeholder="E.g., Felt strong during squat sets, left ankle slightly stiff..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-xs text-slate-200 focus:outline-none focus:border-indigo-500"></textarea>
             </div>
 
             <!-- SUBMIT BUTTON -->
@@ -192,14 +209,13 @@
     <!-- COACH DASHBOARD VIEW SECTION -->
     <!-- ============================================================ -->
     <div id="coachView" class="hidden space-y-6">
-      
       <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6">
         <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
           <div>
             <h2 class="text-xl font-bold text-white flex items-center">
-              <i class="fa-solid fa-user-shield text-indigo-400 me-2"></i> Coach Assessment & Monitoring Portal
+              <i class="fa-solid fa-user-shield text-indigo-400 me-2"></i> Coach Assessment Portal
             </h2>
-            <p class="text-xs text-slate-400">Review real-time athlete completion logs, RPE fatigue levels, and qualitative feedback.</p>
+            <p class="text-xs text-slate-400">Review real-time athlete logs, 1RM progression, and fatigue metrics.</p>
           </div>
 
           <button onclick="loadCoachData()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-2 rounded-lg text-slate-200">
@@ -207,14 +223,13 @@
           </button>
         </div>
 
-        <!-- SUMMARY METRICS CARDS -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
           <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
-            <p class="text-xs text-slate-400">Total Submissions</p>
+            <p class="text-xs text-slate-400">Total Logged Sessions</p>
             <p id="coachTotalLogs" class="text-2xl font-bold text-indigo-400 mt-1">0</p>
           </div>
           <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
-            <p class="text-xs text-slate-400">Active Monitored Athletes</p>
+            <p class="text-xs text-slate-400">Monitored Athletes</p>
             <p class="text-2xl font-bold text-emerald-400 mt-1">3 Athletes</p>
           </div>
           <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
@@ -223,17 +238,16 @@
           </div>
         </div>
 
-        <!-- SUBMITTED LOGS TABLE -->
         <div class="overflow-x-auto">
           <table class="w-full text-left text-xs text-slate-300">
             <thead class="bg-slate-900 text-slate-400 border-b border-slate-700 uppercase font-semibold">
               <tr>
-                <th class="p-3">Athlete</th>
-                <th class="p-3">Program Schedule</th>
+                <th class="p-3">Athlete ID</th>
+                <th class="p-3">Schedule</th>
                 <th class="p-3">Duration</th>
-                <th class="p-3">Difficulty / RPE</th>
+                <th class="p-3">RPE Rating</th>
                 <th class="p-3">Completed Exercises</th>
-                <th class="p-3">Athlete Notes</th>
+                <th class="p-3">Athlete Feedback</th>
               </tr>
             </thead>
             <tbody id="coachLogsTableBody" class="divide-y divide-slate-700/50">
@@ -244,16 +258,97 @@
           </table>
         </div>
       </div>
-
     </div>
 
   </main>
 
-  <!-- JAVASCRIPT APP LOGIC & FIREBASE INTEGRATION -->
+  <!-- ============================================================ -->
+  <!-- MODAL 1: EDIT PROFILE & 1RM BASELINES -->
+  <!-- ============================================================ -->
+  <div id="profileModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+        <h3 class="font-bold text-white text-base">Adjust Athlete Profile & 1RM</h3>
+        <button onclick="closeProfileModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-slate-400 block mb-1">Body Weight (kg)</label>
+            <input type="number" id="inputWeight" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold">
+          </div>
+          <div>
+            <label class="text-slate-400 block mb-1">Height (cm)</label>
+            <input type="number" id="inputHeight" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white font-bold">
+          </div>
+        </div>
+
+        <div class="border-t border-slate-700 pt-3">
+          <p class="font-semibold text-indigo-300 mb-2">1-Rep Max (1RM) Baselines (kg):</p>
+          <div class="grid grid-cols-3 gap-2">
+            <div>
+              <label class="text-slate-400 block mb-1">Squat</label>
+              <input type="number" id="inputSquat" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-indigo-400 font-bold">
+            </div>
+            <div>
+              <label class="text-slate-400 block mb-1">Bench</label>
+              <input type="number" id="inputBench" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-indigo-400 font-bold">
+            </div>
+            <div>
+              <label class="text-slate-400 block mb-1">Deadlift</label>
+              <input type="number" id="inputDeadlift" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-indigo-400 font-bold">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button onclick="saveProfileChanges()" class="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2.5 rounded-xl transition text-xs">
+        Update Dashboard & Target Loads
+      </button>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <!-- MODAL 2: ADD CUSTOM EXERCISE -->
+  <!-- ============================================================ -->
+  <div id="customExModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
+      <div class="flex justify-between items-center border-b border-slate-700 pb-3">
+        <h3 class="font-bold text-white text-base">Add Custom Exercise to Today's Session</h3>
+        <button onclick="closeCustomModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="text-slate-400 block mb-1">Exercise Name</label>
+          <input type="text" id="customName" placeholder="e.g. Silat Guntingan Explosive Entry Drill" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <div>
+            <label class="text-slate-400 block mb-1">Sets & Reps</label>
+            <input type="text" id="customSets" placeholder="e.g. 3 Sets x 10 Reps" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+          </div>
+          <div>
+            <label class="text-slate-400 block mb-1">Target Load</label>
+            <input type="text" id="customLoad" placeholder="e.g. Bodyweight / 15kg" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+          </div>
+        </div>
+        <div>
+          <label class="text-slate-400 block mb-1">Form Tip / Notes</label>
+          <input type="text" id="customTips" placeholder="e.g. Maintain fast hip turnover during execution." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+        </div>
+      </div>
+
+      <button onclick="addCustomExercise()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl transition text-xs">
+        Add Exercise to Checklist
+      </button>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
   <script>
-    // ============================================================
-    // 1. FIREBASE CONFIGURATION (YOUR PROJECT KEYS)
-    // ============================================================
+    // FIREBASE INITIALIZATION
     const firebaseConfig = {
       apiKey: "AIzaSyBoto8JKKT-8loiBSo2l45vBtu_jLn-Jtg",
       authDomain: "athletetrainingapp.firebaseapp.com",
@@ -264,19 +359,23 @@
       measurementId: "G-MCJ71PC979"
     };
 
-    // Initialize Firebase
     if (!firebase.apps.length) {
       firebase.initializeApp(firebaseConfig);
     }
     const db = firebase.firestore();
 
-    // ============================================================
-    // 2. CURRICULUM DATA STRUCTURE
-    // ============================================================
+    // ATHLETE PROFILES STORAGE
+    let athleteProfiles = {
+      "ATH-101": { weight: 58, height: 165, squat: 80, bench: 50, deadlift: 100 },
+      "ATH-102": { weight: 72, height: 178, squat: 120, bench: 85, deadlift: 140 },
+      "ATH-103": { weight: 54, height: 162, squat: 65, bench: 40, deadlift: 85 }
+    };
+
+    // WORKOUT CURRICULUM
     const workoutCurriculum = {
       "1-1": {
         focus: "Week 1 Day 1: Explosive Lower Body Power & Foundation",
-        pedagogy: "Educational Goal: Focus on rapid movement during the concentric phase. Maintain strict lumbar spine posture.",
+        pedagogy: "Educational Goal: Focus on rapid movement during concentric phase. Drive through heels.",
         exercises: [
           { name: "Barbell Back Squat", sets: "4 Sets x 6 Reps", load: "75% 1RM", video: "https://www.youtube.com/embed/gsvT6OHbd_w", tips: "Keep chest lifted and drive through mid-foot." },
           { name: "Plyometric Box Jumps", sets: "3 Sets x 5 Reps", load: "Bodyweight", video: "https://www.youtube.com/embed/52r_Ul5k03g", tips: "Focus on soft, quiet landings to absorb impact safely." }
@@ -284,9 +383,9 @@
       },
       "1-2": {
         focus: "Week 1 Day 2: Upper Body Hypertrophy & Core Stability",
-        pedagogy: "Educational Goal: Focus on controlled eccentric lowering tempo (2-3 seconds) to stimulate muscle hypertrophy.",
+        pedagogy: "Educational Goal: Controlled eccentric lowering tempo (2-3 seconds).",
         exercises: [
-          { name: "Barbell Bench Press", sets: "4 Sets x 8 Reps", load: "70% 1RM", video: "https://www.youtube.com/embed/rT7DgCr-3pg", tips: "Maintain 3 points of contact: head, shoulders, and hips on bench." },
+          { name: "Barbell Bench Press", sets: "4 Sets x 8 Reps", load: "70% 1RM", video: "https://www.youtube.com/embed/rT7DgCr-3pg", tips: "Maintain 3 points of contact on bench." },
           { name: "Hanging Leg Raises", sets: "3 Sets x 12 Reps", load: "Bodyweight", video: "https://www.youtube.com/embed/hdng3Nm1x_E", tips: "Avoid swinging momentum; engage abdominal core tightly." }
         ]
       },
@@ -294,27 +393,21 @@
         focus: "Week 1 Day 3: Multidirectional Agility & Speed",
         pedagogy: "Educational Goal: Master deceleration mechanics and low center-of-mass direction changes.",
         exercises: [
-          { name: "Ladder Drills & Cone Shuttles", sets: "5 Sets x 15s Burst", load: "Speed Focus", video: "https://www.youtube.com/embed/74L19T8oJpE", tips: "Stay light on toe pads; avoid heel striking during quick cuts." }
+          { name: "Ladder Drills & Cone Shuttles", sets: "5 Sets x 15s Burst", load: "Speed Focus", video: "https://www.youtube.com/embed/74L19T8oJpE", tips: "Stay light on toe pads; avoid heel striking." }
         ]
       }
-    };
-
-    const defaultExercise = {
-      focus: "General Physical Preparedness & Conditioning",
-      pedagogy: "Educational Goal: Focus on form compliance and steady metabolic effort.",
-      exercises: [
-        { name: "Trap Bar Deadlift", sets: "3 Sets x 8 Reps", load: "70% 1RM", video: "https://www.youtube.com/embed/gsvT6OHbd_w", tips: "Hinge at hips, engage lats before lifting." }
-      ]
     };
 
     let timerInterval = null;
     let sessionSeconds = 0;
     let selectedRPEValue = "";
+    let customExercises = [];
 
-    // ============================================================
-    // 3. UI INITIALIZATION & SWITCHERS
-    // ============================================================
     window.onload = function() {
+      // Load saved profiles from localStorage if available
+      const saved = localStorage.getItem('fyp_athlete_profiles');
+      if (saved) athleteProfiles = JSON.parse(saved);
+
       loadAthleteProfile();
       renderWorkoutDay();
       startTimer();
@@ -336,33 +429,58 @@
     }
 
     function loadAthleteProfile() {
-      const athleteId = document.getElementById('athleteIdInput').value;
-      if (athleteId === "ATH-101") {
-        document.getElementById('displayWeight').innerText = "58 kg";
-        document.getElementById('displayBMI').innerText = "BMI: 21.3 (Normal)";
-        document.getElementById('squat1RM').innerText = "80 kg";
-        document.getElementById('bench1RM').innerText = "50 kg";
-        document.getElementById('deadlift1RM').innerText = "100 kg";
-      } else if (athleteId === "ATH-102") {
-        document.getElementById('displayWeight').innerText = "72 kg";
-        document.getElementById('displayBMI').innerText = "BMI: 23.1 (Normal)";
-        document.getElementById('squat1RM').innerText = "120 kg";
-        document.getElementById('bench1RM').innerText = "85 kg";
-        document.getElementById('deadlift1RM').innerText = "140 kg";
-      } else {
-        document.getElementById('displayWeight').innerText = "54 kg";
-        document.getElementById('displayBMI').innerText = "BMI: 19.8 (Optimal)";
-        document.getElementById('squat1RM').innerText = "65 kg";
-        document.getElementById('bench1RM').innerText = "40 kg";
-        document.getElementById('deadlift1RM').innerText = "85 kg";
-      }
+      const id = document.getElementById('athleteIdInput').value;
+      const p = athleteProfiles[id] || { weight: 60, height: 165, squat: 70, bench: 45, deadlift: 90 };
+
+      const bmi = (p.weight / ((p.height / 100) ** 2)).toFixed(1);
+      document.getElementById('displayWeight').innerText = `${p.weight} kg (${p.height} cm)`;
+      document.getElementById('displayBMI').innerText = `BMI: ${bmi}`;
+
+      document.getElementById('squat1RM').innerText = `${p.squat} kg`;
+      document.getElementById('bench1RM').innerText = `${p.bench} kg`;
+      document.getElementById('deadlift1RM').innerText = `${p.deadlift} kg`;
+
+      // Auto-calculate 75% target working weights
+      document.getElementById('squat75').innerText = `75%: ${(p.squat * 0.75).toFixed(1)} kg`;
+      document.getElementById('bench75').innerText = `75%: ${(p.bench * 0.75).toFixed(1)} kg`;
+      document.getElementById('deadlift75').innerText = `75%: ${(p.deadlift * 0.75).toFixed(1)} kg`;
+    }
+
+    function openProfileModal() {
+      const id = document.getElementById('athleteIdInput').value;
+      const p = athleteProfiles[id];
+      document.getElementById('inputWeight').value = p.weight;
+      document.getElementById('inputHeight').value = p.height;
+      document.getElementById('inputSquat').value = p.squat;
+      document.getElementById('inputBench').value = p.bench;
+      document.getElementById('inputDeadlift').value = p.deadlift;
+      document.getElementById('profileModal').classList.remove('hidden');
+    }
+
+    function closeProfileModal() {
+      document.getElementById('profileModal').classList.add('hidden');
+    }
+
+    function saveProfileChanges() {
+      const id = document.getElementById('athleteIdInput').value;
+      athleteProfiles[id] = {
+        weight: parseFloat(document.getElementById('inputWeight').value) || 60,
+        height: parseFloat(document.getElementById('inputHeight').value) || 165,
+        squat: parseFloat(document.getElementById('inputSquat').value) || 70,
+        bench: parseFloat(document.getElementById('inputBench').value) || 45,
+        deadlift: parseFloat(document.getElementById('inputDeadlift').value) || 90
+      };
+
+      localStorage.setItem('fyp_athlete_profiles', JSON.stringify(athleteProfiles));
+      loadAthleteProfile();
+      closeProfileModal();
     }
 
     function renderWorkoutDay() {
       const week = document.getElementById('weekSelect').value;
       const day = document.getElementById('daySelect').value;
       const key = `${week}-${day}`;
-      const data = workoutCurriculum[key] || defaultExercise;
+      const data = workoutCurriculum[key] || { focus: "Conditioning Session", pedagogy: "Standard Effort", exercises: [] };
 
       document.getElementById('focusTitle').innerText = data.focus;
       document.getElementById('focusPedagogy').innerHTML = `<strong>Educational Goal:</strong> ${data.pedagogy}`;
@@ -370,7 +488,9 @@
       const container = document.getElementById('exerciseListContainer');
       container.innerHTML = "";
 
-      data.exercises.forEach((ex, idx) => {
+      const allExercises = [...data.exercises, ...customExercises];
+
+      allExercises.forEach((ex, idx) => {
         container.innerHTML += `
           <div class="bg-slate-800 border border-slate-700 rounded-xl p-4 shadow-sm">
             <div class="flex items-start justify-between">
@@ -387,17 +507,40 @@
               <i class="fa-solid fa-lightbulb text-amber-400 me-1"></i> <strong>Form Tip:</strong> ${ex.tips}
             </div>
 
+            ${ex.video ? `
             <div class="mt-3 aspect-video rounded-lg overflow-hidden border border-slate-700">
               <iframe class="w-full h-full" src="${ex.video}" title="Exercise Demo" frameborder="0" allowfullscreen></iframe>
-            </div>
+            </div>` : ''}
           </div>
         `;
       });
     }
 
-    // ============================================================
-    // 4. TIMER & RPE RATING LOGIC
-    // ============================================================
+    function openCustomModal() {
+      document.getElementById('customExModal').classList.remove('hidden');
+    }
+
+    function closeCustomModal() {
+      document.getElementById('customExModal').classList.add('hidden');
+    }
+
+    function addCustomExercise() {
+      const name = document.getElementById('customName').value;
+      if (!name) return;
+
+      customExercises.push({
+        name: name,
+        sets: document.getElementById('customSets').value || "3 Sets x 10 Reps",
+        load: document.getElementById('customLoad').value || "Self-Selected",
+        tips: document.getElementById('customTips').value || "Focus on technique.",
+        video: ""
+      });
+
+      renderWorkoutDay();
+      closeCustomModal();
+      document.getElementById('customName').value = "";
+    }
+
     function startTimer() {
       if (timerInterval) clearInterval(timerInterval);
       timerInterval = setInterval(() => {
@@ -426,13 +569,10 @@
       btnElement.classList.add('bg-indigo-600', 'text-white', 'border-indigo-400');
     }
 
-    // ============================================================
-    // 5. DATABASE SAVE FUNCTION (FIREBASE CLOUD)
-    // ============================================================
     async function submitWorkoutSession() {
       const statusEl = document.getElementById('saveStatus');
       statusEl.classList.remove('hidden');
-      statusEl.innerText = "Saving to database...";
+      statusEl.innerText = "Saving session...";
 
       const athleteId = document.getElementById('athleteIdInput').value;
       const week = document.getElementById('weekSelect').value;
@@ -440,9 +580,7 @@
       const feedback = document.getElementById('athleteFeedback').value;
 
       const completedList = [];
-      document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => {
-        completedList.push(cb.value);
-      });
+      document.querySelectorAll('input[type="checkbox"]:checked').forEach(cb => completedList.push(cb.value));
 
       const logData = {
         athleteId: athleteId,
@@ -450,29 +588,25 @@
         dayNumber: day,
         sessionTimeSeconds: sessionSeconds,
         difficultyRating: selectedRPEValue || "⚡ Moderate (RPE 5-6)",
-        comments: feedback || "No comments written.",
+        comments: feedback || "No notes provided.",
         completedExercises: completedList,
         timestamp: new Date().toISOString()
       };
 
       try {
         await db.collection("workout_logs").add(logData);
-        statusEl.innerText = "✅ Saved to Cloud Database for Coach!";
+        statusEl.innerText = "✅ Saved live to Cloud Firestore!";
         statusEl.className = "text-[11px] text-center mt-2 text-emerald-400";
       } catch (err) {
-        console.warn("Saving to local fallback:", err);
         let localLogs = JSON.parse(localStorage.getItem('fpy_workout_logs') || '[]');
         localLogs.push(logData);
         localStorage.setItem('fpy_workout_logs', JSON.stringify(localLogs));
         
-        statusEl.innerText = "⚠ Saved locally (Check Firestore enable status).";
+        statusEl.innerText = "⚠ Saved locally (Check Firestore connection).";
         statusEl.className = "text-[11px] text-center mt-2 text-amber-400";
       }
     }
 
-    // ============================================================
-    // 6. COACH VIEW: FETCH FROM DATABASE
-    // ============================================================
     async function loadCoachData() {
       const tableBody = document.getElementById('coachLogsTableBody');
       tableBody.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">Loading athlete logs...</td></tr>';
@@ -482,10 +616,8 @@
       try {
         const snapshot = await db.collection("workout_logs").get();
         snapshot.forEach(doc => logs.push(doc.data()));
-        // Sort newest first
         logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       } catch (err) {
-        console.warn("Reading from local fallback:", err);
         logs = JSON.parse(localStorage.getItem('fpy_workout_logs') || '[]').reverse();
       }
 
@@ -503,13 +635,12 @@
 
         const mins = Math.floor(log.sessionTimeSeconds / 60);
         const secs = log.sessionTimeSeconds % 60;
-        const formattedTime = `${mins}m ${secs}s`;
 
         tableBody.innerHTML += `
           <tr class="hover:bg-slate-800/60">
             <td class="p-3 font-bold text-indigo-400">${log.athleteId}</td>
             <td class="p-3">Week ${log.weekNumber}, Day ${log.dayNumber}</td>
-            <td class="p-3 font-mono">${formattedTime}</td>
+            <td class="p-3 font-mono">${mins}m ${secs}s</td>
             <td class="p-3"><span class="px-2 py-0.5 rounded bg-slate-800 border border-slate-700">${log.difficultyRating}</span></td>
             <td class="p-3 text-emerald-400 font-semibold">${log.completedExercises.length} Completed</td>
             <td class="p-3 text-slate-300 italic">${log.comments}</td>
