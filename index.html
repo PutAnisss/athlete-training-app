@@ -109,9 +109,9 @@
           <div>
             <h2 class="text-xl font-bold text-white flex items-center">
               <i class="fa-solid fa-calendar-days text-indigo-500 me-2"></i>
-              3-Day/Week Periodized Conditioning
+              Periodized Conditioning Schedule
             </h2>
-            <p class="text-xs text-slate-400">Select week and training day to receive tailored educational guidance.</p>
+            <p class="text-xs text-slate-400">Select week and training day to view updated exercise prescriptions.</p>
           </div>
 
           <!-- WEEK & DAY PICKERS -->
@@ -152,7 +152,7 @@
               <i class="fa-solid fa-list-check me-2 text-indigo-400"></i> Assigned Exercises
             </h3>
             <div class="flex items-center space-x-2">
-              <button onclick="openCustomModal()" class="bg-slate-800 border border-slate-700 hover:bg-slate-700 text-xs px-3 py-1.5 rounded-xl text-indigo-300 font-semibold transition">
+              <button onclick="openExerciseModal(false)" class="bg-indigo-600 hover:bg-indigo-500 text-xs px-3 py-1.5 rounded-xl text-white font-semibold transition">
                 <i class="fa-solid fa-plus me-1"></i> Add Custom Exercise
               </button>
               <div class="bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-700 flex items-center space-x-2">
@@ -209,13 +209,49 @@
     <!-- COACH DASHBOARD VIEW SECTION -->
     <!-- ============================================================ -->
     <div id="coachView" class="hidden space-y-6">
+      
+      <!-- COACH EXERCISE PROGRAMMING & MODIFICATION HUB -->
+      <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-sm">
+        <div class="flex flex-wrap justify-between items-center gap-4 mb-4">
+          <div>
+            <h2 class="text-xl font-bold text-white flex items-center">
+              <i class="fa-solid fa-sliders text-indigo-400 me-2"></i> Curriculum Management Hub
+            </h2>
+            <p class="text-xs text-slate-400">Add, adjust, or edit exercises directly across any training schedule.</p>
+          </div>
+          
+          <div class="flex items-center space-x-2">
+            <select id="coachWeekSelect" onchange="renderCoachCurriculum()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-slate-200">
+              <option value="1">Week 1: General Conditioning</option>
+              <option value="2">Week 2: Hypertrophy & Base</option>
+              <option value="3">Week 3: Max Power & Explosiveness</option>
+              <option value="4">Week 4: Deload & Agility Peak</option>
+            </select>
+            <select id="coachDaySelect" onchange="renderCoachCurriculum()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-xs text-indigo-400 font-bold">
+              <option value="1">Day 1: Strength & Power</option>
+              <option value="2">Day 2: Hypertrophy & Core</option>
+              <option value="3">Day 3: Agility & Plyometrics</option>
+            </select>
+            <button onclick="openExerciseModal(true)" class="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-3 py-2 rounded-lg font-bold transition flex items-center">
+              <i class="fa-solid fa-plus me-1"></i> Add Drill to Day
+            </button>
+          </div>
+        </div>
+
+        <!-- COACH EDITABLE EXERCISE LIST -->
+        <div id="coachCurriculumList" class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <!-- Populated by JavaScript -->
+        </div>
+      </div>
+
+      <!-- COACH ASSESSMENT PORTAL TABLE -->
       <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6">
         <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
           <div>
             <h2 class="text-xl font-bold text-white flex items-center">
-              <i class="fa-solid fa-user-shield text-indigo-400 me-2"></i> Coach Assessment Portal
+              <i class="fa-solid fa-user-shield text-indigo-400 me-2"></i> Athlete Logbook
             </h2>
-            <p class="text-xs text-slate-400">Review real-time athlete logs, 1RM progression, and fatigue metrics.</p>
+            <p class="text-xs text-slate-400">Review real-time completed logs and submitted RPE values.</p>
           </div>
 
           <button onclick="loadCoachData()" class="bg-slate-700 hover:bg-slate-600 text-xs px-3 py-2 rounded-lg text-slate-200">
@@ -258,6 +294,7 @@
           </table>
         </div>
       </div>
+
     </div>
 
   </main>
@@ -310,38 +347,45 @@
   </div>
 
   <!-- ============================================================ -->
-  <!-- MODAL 2: ADD CUSTOM EXERCISE -->
+  <!-- MODAL 2: ADD / EDIT EXERCISE (COACH & ATHLETE) -->
   <!-- ============================================================ -->
-  <div id="customExModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+  <div id="exerciseModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="bg-slate-800 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl space-y-4">
       <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-        <h3 class="font-bold text-white text-base">Add Custom Exercise to Today's Session</h3>
-        <button onclick="closeCustomModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+        <h3 id="modalTitle" class="font-bold text-white text-base">Add Exercise</h3>
+        <button onclick="closeExerciseModal()" class="text-slate-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
       </div>
+
+      <input type="hidden" id="editExerciseIndex" value="-1">
+      <input type="hidden" id="isCoachAction" value="false">
 
       <div class="space-y-3 text-xs">
         <div>
           <label class="text-slate-400 block mb-1">Exercise Name</label>
-          <input type="text" id="customName" placeholder="e.g. Silat Guntingan Explosive Entry Drill" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+          <input type="text" id="exName" placeholder="e.g. Silat Guntingan Explosive Entry Drill" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
         </div>
         <div class="grid grid-cols-2 gap-2">
           <div>
             <label class="text-slate-400 block mb-1">Sets & Reps</label>
-            <input type="text" id="customSets" placeholder="e.g. 3 Sets x 10 Reps" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+            <input type="text" id="exSets" placeholder="e.g. 4 Sets x 6 Reps" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
           </div>
           <div>
             <label class="text-slate-400 block mb-1">Target Load</label>
-            <input type="text" id="customLoad" placeholder="e.g. Bodyweight / 15kg" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+            <input type="text" id="exLoad" placeholder="e.g. 75% 1RM / Bodyweight" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
           </div>
         </div>
         <div>
           <label class="text-slate-400 block mb-1">Form Tip / Notes</label>
-          <input type="text" id="customTips" placeholder="e.g. Maintain fast hip turnover during execution." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+          <input type="text" id="exTips" placeholder="e.g. Maintain fast hip turnover during execution." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
+        </div>
+        <div>
+          <label class="text-slate-400 block mb-1">YouTube Video Embed URL (Optional)</label>
+          <input type="text" id="exVideo" placeholder="https://www.youtube.com/embed/..." class="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white">
         </div>
       </div>
 
-      <button onclick="addCustomExercise()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl transition text-xs">
-        Add Exercise to Checklist
+      <button onclick="saveExercise()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-xl transition text-xs">
+        Save Exercise
       </button>
     </div>
   </div>
@@ -364,15 +408,15 @@
     }
     const db = firebase.firestore();
 
-    // ATHLETE PROFILES STORAGE
+    // ATHLETE PROFILES
     let athleteProfiles = {
       "ATH-101": { weight: 58, height: 165, squat: 80, bench: 50, deadlift: 100 },
       "ATH-102": { weight: 72, height: 178, squat: 120, bench: 85, deadlift: 140 },
       "ATH-103": { weight: 54, height: 162, squat: 65, bench: 40, deadlift: 85 }
     };
 
-    // WORKOUT CURRICULUM
-    const workoutCurriculum = {
+    // BASE WORKOUT CURRICULUM
+    let workoutCurriculum = {
       "1-1": {
         focus: "Week 1 Day 1: Explosive Lower Body Power & Foundation",
         pedagogy: "Educational Goal: Focus on rapid movement during concentric phase. Drive through heels.",
@@ -404,9 +448,12 @@
     let customExercises = [];
 
     window.onload = function() {
-      // Load saved profiles from localStorage if available
-      const saved = localStorage.getItem('fyp_athlete_profiles');
-      if (saved) athleteProfiles = JSON.parse(saved);
+      // Load saved profiles & custom curriculum from localStorage
+      const savedProfiles = localStorage.getItem('fyp_athlete_profiles');
+      if (savedProfiles) athleteProfiles = JSON.parse(savedProfiles);
+
+      const savedCurriculum = localStorage.getItem('fyp_workout_curriculum');
+      if (savedCurriculum) workoutCurriculum = JSON.parse(savedCurriculum);
 
       loadAthleteProfile();
       renderWorkoutDay();
@@ -419,11 +466,13 @@
         document.getElementById('coachView').classList.add('hidden');
         document.getElementById('btnAthleteMode').className = "px-4 py-1.5 rounded-lg bg-indigo-600 text-white transition";
         document.getElementById('btnCoachMode').className = "px-4 py-1.5 rounded-lg text-slate-400 hover:text-white transition";
+        renderWorkoutDay();
       } else {
         document.getElementById('athleteView').classList.add('hidden');
         document.getElementById('coachView').classList.remove('hidden');
         document.getElementById('btnCoachMode').className = "px-4 py-1.5 rounded-lg bg-indigo-600 text-white transition";
         document.getElementById('btnAthleteMode').className = "px-4 py-1.5 rounded-lg text-slate-400 hover:text-white transition";
+        renderCoachCurriculum();
         loadCoachData();
       }
     }
@@ -440,7 +489,6 @@
       document.getElementById('bench1RM').innerText = `${p.bench} kg`;
       document.getElementById('deadlift1RM').innerText = `${p.deadlift} kg`;
 
-      // Auto-calculate 75% target working weights
       document.getElementById('squat75').innerText = `75%: ${(p.squat * 0.75).toFixed(1)} kg`;
       document.getElementById('bench75').innerText = `75%: ${(p.bench * 0.75).toFixed(1)} kg`;
       document.getElementById('deadlift75').innerText = `75%: ${(p.deadlift * 0.75).toFixed(1)} kg`;
@@ -476,11 +524,12 @@
       closeProfileModal();
     }
 
+    // ATHLETE WORKOUT DAY RENDERER
     function renderWorkoutDay() {
       const week = document.getElementById('weekSelect').value;
       const day = document.getElementById('daySelect').value;
       const key = `${week}-${day}`;
-      const data = workoutCurriculum[key] || { focus: "Conditioning Session", pedagogy: "Standard Effort", exercises: [] };
+      const data = workoutCurriculum[key] || { focus: "Custom Training Session", pedagogy: "Maintain optimal execution technique.", exercises: [] };
 
       document.getElementById('focusTitle').innerText = data.focus;
       document.getElementById('focusPedagogy').innerHTML = `<strong>Educational Goal:</strong> ${data.pedagogy}`;
@@ -516,29 +565,132 @@
       });
     }
 
-    function openCustomModal() {
-      document.getElementById('customExModal').classList.remove('hidden');
+    // COACH CURRICULUM RENDERER
+    function renderCoachCurriculum() {
+      const week = document.getElementById('coachWeekSelect').value;
+      const day = document.getElementById('coachDaySelect').value;
+      const key = `${week}-${day}`;
+
+      if (!workoutCurriculum[key]) {
+        workoutCurriculum[key] = {
+          focus: `Week ${week} Day ${day}: Custom Session`,
+          pedagogy: "Focus on form and safety.",
+          exercises: []
+        };
+      }
+
+      const list = workoutCurriculum[key].exercises;
+      const container = document.getElementById('coachCurriculumList');
+      container.innerHTML = "";
+
+      if (list.length === 0) {
+        container.innerHTML = '<p class="text-slate-500 text-xs col-span-2">No exercises programmed for this day yet. Click "Add Drill to Day" above.</p>';
+        return;
+      }
+
+      list.forEach((ex, index) => {
+        container.innerHTML += `
+          <div class="bg-slate-900 border border-slate-700 rounded-xl p-4 space-y-2">
+            <div class="flex justify-between items-start">
+              <div>
+                <h4 class="font-bold text-white text-sm">${ex.name}</h4>
+                <p class="text-xs text-indigo-400">${ex.sets} • Load: ${ex.load}</p>
+              </div>
+              <div class="flex space-x-1">
+                <button onclick="editCoachExercise(${index})" class="text-indigo-400 hover:text-indigo-300 text-xs p-1"><i class="fa-solid fa-pen"></i></button>
+                <button onclick="deleteCoachExercise(${index})" class="text-rose-400 hover:text-rose-300 text-xs p-1"><i class="fa-solid fa-trash"></i></button>
+              </div>
+            </div>
+            <p class="text-[11px] text-slate-400 italic">" ${ex.tips} "</p>
+          </div>
+        `;
+      });
     }
 
-    function closeCustomModal() {
-      document.getElementById('customExModal').classList.add('hidden');
+    // EXERCISE MODAL MANAGEMENT (ADD & EDIT)
+    function openExerciseModal(isCoach = false, editIndex = -1) {
+      document.getElementById('isCoachAction').value = isCoach;
+      document.getElementById('editExerciseIndex').value = editIndex;
+
+      if (editIndex >= 0 && isCoach) {
+        const week = document.getElementById('coachWeekSelect').value;
+        const day = document.getElementById('coachDaySelect').value;
+        const ex = workoutCurriculum[`${week}-${day}`].exercises[editIndex];
+
+        document.getElementById('modalTitle').innerText = "Edit Exercise Drill";
+        document.getElementById('exName').value = ex.name;
+        document.getElementById('exSets').value = ex.sets;
+        document.getElementById('exLoad').value = ex.load;
+        document.getElementById('exTips').value = ex.tips;
+        document.getElementById('exVideo').value = ex.video || "";
+      } else {
+        document.getElementById('modalTitle').innerText = isCoach ? "Add New Drill to Schedule" : "Add Custom Exercise";
+        document.getElementById('exName').value = "";
+        document.getElementById('exSets').value = "";
+        document.getElementById('exLoad').value = "";
+        document.getElementById('exTips').value = "";
+        document.getElementById('exVideo').value = "";
+      }
+
+      document.getElementById('exerciseModal').classList.remove('hidden');
     }
 
-    function addCustomExercise() {
-      const name = document.getElementById('customName').value;
+    function closeExerciseModal() {
+      document.getElementById('exerciseModal').classList.add('hidden');
+    }
+
+    function saveExercise() {
+      const name = document.getElementById('exName').value;
       if (!name) return;
 
-      customExercises.push({
-        name: name,
-        sets: document.getElementById('customSets').value || "3 Sets x 10 Reps",
-        load: document.getElementById('customLoad').value || "Self-Selected",
-        tips: document.getElementById('customTips').value || "Focus on technique.",
-        video: ""
-      });
+      const isCoach = document.getElementById('isCoachAction').value === "true";
+      const editIndex = parseInt(document.getElementById('editExerciseIndex').value);
 
-      renderWorkoutDay();
-      closeCustomModal();
-      document.getElementById('customName').value = "";
+      const exerciseData = {
+        name: name,
+        sets: document.getElementById('exSets').value || "3 Sets x 10 Reps",
+        load: document.getElementById('exLoad').value || "Self-Selected",
+        tips: document.getElementById('exTips').value || "Focus on technique.",
+        video: document.getElementById('exVideo').value || ""
+      };
+
+      if (isCoach) {
+        const week = document.getElementById('coachWeekSelect').value;
+        const day = document.getElementById('coachDaySelect').value;
+        const key = `${week}-${day}`;
+
+        if (!workoutCurriculum[key]) {
+          workoutCurriculum[key] = { focus: `Week ${week} Day ${day}`, pedagogy: "Standard effort", exercises: [] };
+        }
+
+        if (editIndex >= 0) {
+          workoutCurriculum[key].exercises[editIndex] = exerciseData;
+        } else {
+          workoutCurriculum[key].exercises.push(exerciseData);
+        }
+
+        localStorage.setItem('fyp_workout_curriculum', JSON.stringify(workoutCurriculum));
+        renderCoachCurriculum();
+      } else {
+        customExercises.push(exerciseData);
+        renderWorkoutDay();
+      }
+
+      closeExerciseModal();
+    }
+
+    function editCoachExercise(index) {
+      openExerciseModal(true, index);
+    }
+
+    function deleteCoachExercise(index) {
+      const week = document.getElementById('coachWeekSelect').value;
+      const day = document.getElementById('coachDaySelect').value;
+      const key = `${week}-${day}`;
+
+      workoutCurriculum[key].exercises.splice(index, 1);
+      localStorage.setItem('fyp_workout_curriculum', JSON.stringify(workoutCurriculum));
+      renderCoachCurriculum();
     }
 
     function startTimer() {
@@ -598,11 +750,11 @@
         statusEl.innerText = "✅ Saved live to Cloud Firestore!";
         statusEl.className = "text-[11px] text-center mt-2 text-emerald-400";
       } catch (err) {
-        let localLogs = JSON.parse(localStorage.getItem('fpy_workout_logs') || '[]');
+        let localLogs = JSON.parse(localStorage.getItem('fyp_workout_logs') || '[]');
         localLogs.push(logData);
-        localStorage.setItem('fpy_workout_logs', JSON.stringify(localLogs));
+        localStorage.setItem('fyp_workout_logs', JSON.stringify(localLogs));
         
-        statusEl.innerText = "⚠ Saved locally (Check Firestore connection).";
+        statusEl.innerText = "⚠ Saved locally (Offline mode active).";
         statusEl.className = "text-[11px] text-center mt-2 text-amber-400";
       }
     }
@@ -618,7 +770,7 @@
         snapshot.forEach(doc => logs.push(doc.data()));
         logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
       } catch (err) {
-        logs = JSON.parse(localStorage.getItem('fpy_workout_logs') || '[]').reverse();
+        logs = JSON.parse(localStorage.getItem('fyp_workout_logs') || '[]').reverse();
       }
 
       document.getElementById('coachTotalLogs').innerText = logs.length;
